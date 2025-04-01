@@ -1,146 +1,171 @@
 
-import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, ResponsiveContainer, Cell } from 'recharts';
-import { cn } from '@/lib/utils';
+import React, { useState } from 'react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LabelList,
+} from 'recharts';
+import { motion } from 'framer-motion';
 
-type Skill = {
-  name: string;
-  level: number;
-  category: 'frontend' | 'backend' | 'design' | 'other';
-};
-
-const skills: Skill[] = [
-  { name: 'React', level: 90, category: 'frontend' },
-  { name: 'TypeScript', level: 85, category: 'frontend' },
-  { name: 'Node.js', level: 80, category: 'backend' },
-  { name: 'Three.js', level: 75, category: 'frontend' },
-  { name: 'UI/UX Design', level: 85, category: 'design' },
-  { name: 'Next.js', level: 88, category: 'frontend' },
-  { name: 'GraphQL', level: 70, category: 'backend' },
-  { name: 'PostgreSQL', level: 75, category: 'backend' },
-  { name: 'Framer Motion', level: 80, category: 'frontend' },
-  { name: 'Figma', level: 85, category: 'design' },
-  { name: 'Docker', level: 70, category: 'other' },
-  { name: 'AWS', level: 65, category: 'other' },
+const skills = [
+  { name: 'React', value: 90, color: '#61DAFB' },
+  { name: 'JavaScript', value: 85, color: '#F7DF1E' },
+  { name: 'TypeScript', value: 80, color: '#007ACC' },
+  { name: 'Node.js', value: 75, color: '#339933' },
+  { name: 'UI/UX Design', value: 85, color: '#FF7C7C' },
+  { name: 'Three.js', value: 70, color: '#8B5CF6' },
 ];
 
-type CategoryTab = 'all' | 'frontend' | 'backend' | 'design' | 'other';
+const frontendSkills = [
+  { category: 'Frontend', skill: 'React', level: 90 },
+  { category: 'Frontend', skill: 'Next.js', level: 85 },
+  { category: 'Frontend', skill: 'HTML/CSS', level: 95 },
+  { category: 'Frontend', skill: 'Tailwind', level: 90 },
+  { category: 'Backend', skill: 'Node.js', level: 80 },
+  { category: 'Backend', skill: 'Express', level: 75 },
+  { category: 'Backend', skill: 'PostgreSQL', level: 70 },
+  { category: 'Design', skill: 'Figma', level: 85 },
+  { category: 'Design', skill: 'UI/UX', level: 80 },
+];
+
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="glass-panel p-2">
+        <p className="font-medium">{`${payload[0].payload.skill}`}</p>
+        <p className="text-sm text-muted-foreground">{`Proficiency: ${payload[0].value}%`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomLabel = (props: any) => {
+  const { x, y, width, value } = props;
+  return (
+    <text
+      x={x + width - 5}
+      y={y + 10}
+      fill="#fff"
+      textAnchor="end"
+      dominantBaseline="middle"
+      className="text-xs font-medium"
+    >
+      {value}%
+    </text>
+  );
+};
 
 export default function SkillsSection() {
-  const [activeCategory, setActiveCategory] = useState<CategoryTab>('all');
-  const [visibleSkills, setVisibleSkills] = useState<Skill[]>([]);
-  const [isAnimating, setIsAnimating] = useState(false);
-  
-  // Filter skills based on active category
-  useEffect(() => {
-    setIsAnimating(true);
-    
-    setTimeout(() => {
-      const filteredSkills = activeCategory === 'all'
-        ? skills
-        : skills.filter(skill => skill.category === activeCategory);
-      
-      setVisibleSkills(filteredSkills);
-      setIsAnimating(false);
-    }, 300);
-  }, [activeCategory]);
-
-  const getBarColor = (category: string) => {
-    switch(category) {
-      case 'frontend': return '#9B87F5';
-      case 'backend': return '#7E69AB';
-      case 'design': return '#F97316';
-      case 'other': return '#1EAEDB';
-      default: return '#9B87F5';
-    }
-  };
+  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
 
   return (
-    <section id="skills" className="section-container bg-secondary/50 dark:bg-secondary/20 rounded-3xl my-16">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-12">
+    <section id="skills" className="section-container">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Skills & Expertise</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            A visualization of technical proficiencies and creative capabilities.
+            Technologies and skills I've mastered over the years
           </p>
         </div>
-        
-        <div className="mb-8 flex flex-wrap justify-center gap-2">
-          {(['all', 'frontend', 'backend', 'design', 'other'] as CategoryTab[]).map((category) => (
-            <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={cn(
-                "px-4 py-2 rounded-full text-sm transition-all duration-300",
-                activeCategory === category 
-                  ? "bg-vortex-purple text-white shadow-md" 
-                  : "bg-white/20 dark:bg-white/5 hover:bg-white/30 dark:hover:bg-white/10"
-              )}
-            >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </button>
-          ))}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+          <motion.div 
+            className="glass-panel p-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h3 className="text-xl font-bold mb-4">Core Competencies</h3>
+            <div className="space-y-6">
+              {skills.map((skill) => (
+                <div key={skill.name} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span>{skill.name}</span>
+                    <span className="text-sm text-muted-foreground">{skill.value}%</span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${skill.value}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, delay: 0.2 }}
+                      className="h-full rounded-full"
+                      style={{ backgroundColor: skill.color }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div 
+            className="glass-panel p-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h3 className="text-xl font-bold mb-4">Technology Breakdown</h3>
+            <div className="h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  layout="vertical"
+                  data={frontendSkills}
+                  margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" domain={[0, 100]} />
+                  <YAxis type="category" dataKey="skill" width={80} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar 
+                    dataKey="level" 
+                    fill="#8B5CF6"
+                    radius={[0, 4, 4, 0]}
+                    className="fill-vortex-vivid"
+                  >
+                    <LabelList content={<CustomLabel />} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
         </div>
-        
-        <div className={cn(
-          "transition-opacity duration-300 glass-panel p-6",
-          isAnimating ? "opacity-0" : "opacity-100"
-        )}>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={visibleSkills}
-              layout="vertical"
-              margin={{ top: 20, right: 30, left: 80, bottom: 10 }}
-              barCategoryGap={12}
-              barGap={8}
-            >
-              <XAxis type="number" domain={[0, 100]} hide />
-              <Bar
-                dataKey="level"
-                nameKey="name"
-                label={(props) => {
-                  const { x, width, y, value, name } = props;
-                  return (
-                    <>
-                      <text
-                        x={10}
-                        y={y + 4}
-                        textAnchor="start"
-                        dominantBaseline="middle"
-                        className="text-xs md:text-sm fill-current"
-                      >
-                        {name}
-                      </text>
-                      <text
-                        x={width - 5}
-                        y={y + 4}
-                        textAnchor="end"
-                        dominantBaseline="middle"
-                        className="text-xs fill-current"
-                      >
-                        {value}%
-                      </text>
-                    </>
-                  );
-                }}
-                radius={[0, 4, 4, 0]}
-                className="animate-fade-in"
+
+        <motion.div 
+          className="glass-panel p-6 text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h3 className="text-xl font-bold mb-4">Additional Expertise</h3>
+          <div className="flex flex-wrap justify-center gap-3">
+            {["Framer Motion", "Three.js", "WebGL", "GraphQL", "REST APIs", "Responsive Design", 
+              "Animations", "Firebase", "AWS", "Docker", "CI/CD", "Git", "Figma", "Adobe XD"].map((skill) => (
+              <motion.span
+                key={skill}
+                className={`px-4 py-2 rounded-full text-sm ${
+                  hoveredSkill === skill
+                    ? "bg-vortex-purple text-white"
+                    : "bg-secondary text-foreground"
+                } transition-all duration-300`}
+                onMouseEnter={() => setHoveredSkill(skill)}
+                onMouseLeave={() => setHoveredSkill(null)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {visibleSkills.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={getBarColor(entry.category)} 
-                    style={{ 
-                      animation: `fade-in-right 0.6s ease-out ${index * 0.05}s`,
-                      transform: isAnimating ? 'translateX(-20px)' : 'translateX(0)',
-                      opacity: isAnimating ? 0 : 1
-                    }} 
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+                {skill}
+              </motion.span>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   );

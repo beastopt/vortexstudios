@@ -1,20 +1,22 @@
 
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Menu, X, Github, Linkedin, Twitter } from 'lucide-react';
+import { Menu, X, Linkedin, Twitter, LogIn } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const navigation = [
-  { name: 'About', href: '#about' },
-  { name: 'Projects', href: '#projects' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Experience', href: '#experience' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'About', href: '/#about' },
+  { name: 'Projects', href: '/#projects' },
+  { name: 'Skills', href: '/#skills' },
+  { name: 'Experience', href: '/#experience' },
+  { name: 'Products', href: '/products' },
+  { name: 'Contact', href: '/#contact' },
 ];
 
 const socials = [
-  { name: 'GitHub', href: 'https://github.com/vortexstudios', icon: Github },
   { name: 'LinkedIn', href: 'https://linkedin.com/in/vortexstudios', icon: Linkedin },
   { name: 'Twitter', href: 'https://twitter.com/vortexstudios', icon: Twitter },
 ];
@@ -22,6 +24,7 @@ const socials = [
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { currentUser, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,6 +41,14 @@ export default function Header() {
     };
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
     <header
       className={cn(
@@ -50,23 +61,23 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <div className="flex-shrink-0">
-            <a href="#" className="flex items-center">
+            <Link to="/" className="flex items-center">
               <span className="text-2xl font-display font-bold gradient-text">
                 VortexStudios
               </span>
-            </a>
+            </Link>
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
             <nav className="flex items-center space-x-6">
               {navigation.map((item) => (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
+                  to={item.href}
                   className="text-sm font-medium hover:text-vortex-purple dark:hover:text-vortex-light-purple transition-colors"
                 >
                   {item.name}
-                </a>
+                </Link>
               ))}
             </nav>
             
@@ -88,6 +99,19 @@ export default function Header() {
               })}
               <div className="border-l border-border h-6 mx-1" />
               <ThemeToggle />
+
+              {currentUser ? (
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  Logout
+                </Button>
+              ) : (
+                <Link to="/login">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <LogIn className="h-4 w-4" />
+                    <span>Login</span>
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
           
@@ -137,15 +161,28 @@ export default function Header() {
           </div>
           <div className="mt-2 space-y-6">
             {navigation.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
+                to={item.href}
                 className="block py-2 text-base font-medium hover:text-vortex-purple dark:hover:text-vortex-light-purple"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
+            
+            {currentUser ? (
+              <Button variant="outline" className="w-full mt-4" onClick={handleLogout}>
+                Logout
+              </Button>
+            ) : (
+              <Link to="/login" className="block w-full mt-4" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                  <LogIn className="h-4 w-4" />
+                  <span>Login</span>
+                </Button>
+              </Link>
+            )}
           </div>
           <div className="mt-auto pt-6 flex justify-center space-x-6">
             {socials.map((item) => {
