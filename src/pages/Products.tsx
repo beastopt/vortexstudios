@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
@@ -16,7 +15,7 @@ import {
   LineChart,
   Layers
 } from "lucide-react";
-import { toast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const websiteProducts = [
   {
@@ -117,12 +116,10 @@ const websiteProducts = [
 
 export default function Products() {
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
+  const navigate = useNavigate();
 
-  const handlePurchase = (id: number, title: string) => {
-    toast({
-      title: "Added to cart!",
-      description: `${title} has been added to your cart.`,
-    });
+  const handleCustomQuote = () => {
+    navigate('/#contact');
   };
 
   const container = {
@@ -166,7 +163,7 @@ export default function Products() {
                 </motion.p>
               </div>
 
-              <motion.div 
+              <motion.div
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                 variants={container}
                 initial="hidden"
@@ -191,6 +188,7 @@ export default function Products() {
                         <Badge className="bg-vortex-vivid font-medium m-2">Most Popular</Badge>
                       </div>
                     )}
+                    
                     <div className="p-6">
                       <div className="flex items-center mb-4">
                         <div className="w-12 h-12 flex items-center justify-center rounded-full bg-vortex-purple/20 mr-4">
@@ -222,11 +220,11 @@ export default function Products() {
                         ))}
                       </div>
 
-                      <Button 
+                      <Button
                         className="w-full group"
-                        onClick={() => handlePurchase(product.id, product.title)}
+                        onClick={handleCustomQuote}
                       >
-                        <span>Purchase Now</span>
+                        <span>Get Custom Quote</span>
                         <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                       </Button>
                     </div>
@@ -250,7 +248,7 @@ export default function Products() {
                 We create tailor-made solutions for unique business requirements.
                 Contact us for a personalized quote.
               </p>
-              <Button size="lg">
+              <Button size="lg" onClick={handleCustomQuote}>
                 Get Custom Quote
               </Button>
             </div>
