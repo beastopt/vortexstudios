@@ -16,6 +16,9 @@ import {
   Layers
 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import { ProductDetailsModal } from '@/components/ProductDetailsModal';
+import { useCart } from '@/contexts/CartContext';
+import { toast } from 'sonner';
 
 const websiteProducts = [
   {
@@ -116,10 +119,22 @@ const websiteProducts = [
 
 export default function Products() {
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<typeof websiteProducts[0] | null>(null);
   const navigate = useNavigate();
+  const { addItem } = useCart();
 
   const handleCustomQuote = () => {
     navigate('/#contact');
+  };
+
+  const handleAddToCart = (product: typeof websiteProducts[0], e: React.MouseEvent) => {
+    e.stopPropagation();
+    addItem({
+      id: product.id,
+      title: product.title,
+      price: product.discountedPrice
+    });
+    toast.success("Added to cart!");
   };
 
   const container = {
@@ -172,12 +187,13 @@ export default function Products() {
                 {websiteProducts.map((product) => (
                   <motion.div
                     key={product.id}
-                    className={`glass-panel relative overflow-hidden ${
+                    className={`glass-panel relative overflow-hidden cursor-pointer ${
                       product.popular ? "ring-2 ring-vortex-vivid" : ""
                     }`}
                     variants={item}
                     onMouseEnter={() => setHoveredProduct(product.id)}
                     onMouseLeave={() => setHoveredProduct(null)}
+                    onClick={() => setSelectedProduct(product)}
                     whileHover={{ 
                       y: -5,
                       transition: { duration: 0.2 }
@@ -220,20 +236,26 @@ export default function Products() {
                         ))}
                       </div>
 
-                      <Button
-                        className="w-full group"
-                        onClick={handleCustomQuote}
-                      >
-                        <span>Get Custom Quote</span>
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </div>
-
-                    <div 
-                      className={`absolute inset-0 bg-gradient-to-r from-vortex-purple/10 to-vortex-vivid/10 backdrop-blur-sm opacity-0 transition-opacity duration-300 flex items-center justify-center ${
-                        hoveredProduct === product.id ? "opacity-100" : "opacity-0"
-                      }`}
-                    >
+                      <div className="flex flex-col space-y-3">
+                        <Button
+                          className="w-full group"
+                          onClick={(e) => handleAddToCart(product, e)}
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-2" />
+                          <span>Add to Cart</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full group"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCustomQuote();
+                          }}
+                        >
+                          <span>Get Custom Quote</span>
+                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </div>
                     </div>
                   </motion.div>
                 ))}
@@ -255,6 +277,13 @@ export default function Products() {
           </section>
         </main>
         <Footer />
+        {selectedProduct && (
+          <ProductDetailsModal
+            isOpen={!!selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+            product={selectedProduct}
+          />
+        )}
       </div>
     </ThemeProvider>
   );
